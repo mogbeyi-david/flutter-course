@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../widgets/helpers/ensure_visible.dart';
-import 'package:scoped_model/scoped_model.dart';
-import 'package:flutter_course/scoped-models/main.dart';
 
-import 'package:flutter_course/models/product.dart';
+import 'package:scoped_model/scoped_model.dart';
+
+import '../widgets/helpers/ensure_visible.dart';
+import '../models/product.dart';
+import '../scoped-models/main.dart';
 
 class ProductEditPage extends StatefulWidget {
   @override
@@ -14,33 +15,33 @@ class ProductEditPage extends StatefulWidget {
 
 class _ProductEditPageState extends State<ProductEditPage> {
   final Map<String, dynamic> _formData = {
-    "title": null,
-    "description": null,
-    "price": null,
+    'title': null,
+    'description': null,
+    'price': null,
     'image': 'assets/food.jpg'
   };
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final _titleFocusNode = new FocusNode();
-  final _descriptionFocusNode = new FocusNode();
-  final _priceFocusNode = new FocusNode();
+  final _titleFocusNode = FocusNode();
+  final _descriptionFocusNode = FocusNode();
+  final _priceFocusNode = FocusNode();
 
   Widget _buildTitleTextField(Product product) {
     return EnsureVisibleWhenFocused(
+      focusNode: _titleFocusNode,
       child: TextFormField(
         focusNode: _titleFocusNode,
-        initialValue: product != null ? product.title : "",
         decoration: InputDecoration(labelText: 'Product Title'),
-        // ignore: missing_return
+        initialValue: product == null ? '' : product.title,
         validator: (String value) {
+          // if (value.trim().length <= 0) {
           if (value.isEmpty || value.length < 5) {
-            return "Title is required and should be 5 plus characters long";
+            return 'Title is required and should be 5+ characters long.';
           }
         },
         onSaved: (String value) {
-          _formData["title"] = value;
+          _formData['title'] = value;
         },
       ),
-      focusNode: _titleFocusNode,
     );
   }
 
@@ -48,19 +49,20 @@ class _ProductEditPageState extends State<ProductEditPage> {
     return EnsureVisibleWhenFocused(
       focusNode: _descriptionFocusNode,
       child: TextFormField(
-          focusNode: _descriptionFocusNode,
-          initialValue: product != null ? product.description : "",
-          maxLines: 4,
-          // ignore: missing_return
-          validator: (String value) {
-            if (value.isEmpty || value.length < 10) {
-              return "Description is required and should be 10 plus characters long";
-            }
-          },
-          onSaved: (String value) {
-            _formData["description"] = value;
-          },
-          decoration: InputDecoration(labelText: 'Product Description')),
+        focusNode: _descriptionFocusNode,
+        maxLines: 4,
+        decoration: InputDecoration(labelText: 'Product Description'),
+        initialValue: product == null ? '' : product.description,
+        validator: (String value) {
+          // if (value.trim().length <= 0) {
+          if (value.isEmpty || value.length < 10) {
+            return 'Description is required and should be 10+ characters long.';
+          }
+        },
+        onSaved: (String value) {
+          _formData['description'] = value;
+        },
+      ),
     );
   }
 
@@ -68,61 +70,41 @@ class _ProductEditPageState extends State<ProductEditPage> {
     return EnsureVisibleWhenFocused(
       focusNode: _priceFocusNode,
       child: TextFormField(
-          focusNode: _priceFocusNode,
-          initialValue: product != null ? product.price.toString() : "",
-          keyboardType: TextInputType.number,
-          // ignore: missing_return,
-          validator: (String value) {
-            if (value.isEmpty ||
-                !RegExp(r'^(?:[1-9]\d*|0)?(?:\.\d+)?$').hasMatch(value)) {
-              return "Price is required and should be a number";
-            }
-          },
-          onSaved: (String value) {
-            _formData["price"] = double.parse(value);
-          },
-          decoration: InputDecoration(labelText: 'Product Price')),
+        focusNode: _priceFocusNode,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(labelText: 'Product Price'),
+        initialValue: product == null ? '' : product.price.toString(),
+        validator: (String value) {
+          // if (value.trim().length <= 0) {
+          if (value.isEmpty ||
+              !RegExp(r'^(?:[1-9]\d*|0)?(?:\.\d+)?$').hasMatch(value)) {
+            return 'Price is required and should be a number.';
+          }
+        },
+        onSaved: (String value) {
+          _formData['price'] = double.parse(value);
+        },
+      ),
     );
   }
 
-  void _submitForm(Function addProduct, Function updateProduct,
-      [int selectedProductIndex]) {
-    if (!_formKey.currentState.validate()) {
-      return;
-    }
-    _formKey.currentState.save();
-    if (selectedProductIndex == null) {
-      addProduct(
-        _formData["title"],
-        _formData["description"],
-        _formData["image"],
-        _formData["price"],
-      );
-    } else {
-      updateProduct(_formData["title"], _formData["description"],
-          _formData["image"], _formData["price"]);
-    }
-    Navigator.pushReplacementNamed(context, '/products');
-  }
-
-  Widget buildSubmitButton() {
+  Widget _buildSubmitButton() {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
         return RaisedButton(
           child: Text('Save'),
           textColor: Colors.white,
           onPressed: () => _submitForm(model.addProduct, model.updateProduct,
-              model.selectedProductIndex),
+              model.selectProduct, model.selectedProductIndex),
         );
       },
     );
   }
 
-  Widget buildPageContent(BuildContext context, Product product) {
+  Widget _buildPageContent(BuildContext context, Product product) {
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
     final double targetPadding = deviceWidth - targetWidth;
-
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
@@ -140,7 +122,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
               SizedBox(
                 height: 10.0,
               ),
-              buildSubmitButton()
+              _buildSubmitButton(),
               // GestureDetector(
               //   onTap: _submitForm,
               //   child: Container(
@@ -156,16 +138,46 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
+  void _submitForm(
+      Function addProduct, Function updateProduct, Function setSelectedProduct,
+      [int selectedProductIndex]) {
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
+    _formKey.currentState.save();
+    if (selectedProductIndex == null) {
+      addProduct(
+        _formData['title'],
+        _formData['description'],
+        _formData['image'],
+        _formData['price'],
+      );
+    } else {
+      updateProduct(
+        _formData['title'],
+        _formData['description'],
+        _formData['image'],
+        _formData['price'],
+      );
+    }
+
+    Navigator
+        .pushReplacementNamed(context, '/products')
+        .then((_) => setSelectedProduct(null));
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
         final Widget pageContent =
-            buildPageContent(context, model.selectedProduct);
+            _buildPageContent(context, model.selectedProduct);
         return model.selectedProductIndex == null
             ? pageContent
             : Scaffold(
-                appBar: AppBar(title: Text("Edit Product")),
+                appBar: AppBar(
+                  title: Text('Edit Product'),
+                ),
                 body: pageContent,
               );
       },

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_course/scoped-models/main.dart';
+
 import 'package:scoped_model/scoped_model.dart';
+
+import '../scoped-models/main.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -31,7 +33,6 @@ class _AuthPageState extends State<AuthPage> {
       decoration: InputDecoration(
           labelText: 'E-Mail', filled: true, fillColor: Colors.white),
       keyboardType: TextInputType.emailAddress,
-      // ignore: missing_return
       validator: (String value) {
         if (value.isEmpty ||
             !RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
@@ -50,9 +51,7 @@ class _AuthPageState extends State<AuthPage> {
       decoration: InputDecoration(
           labelText: 'Password', filled: true, fillColor: Colors.white),
       obscureText: true,
-      // ignore: missing_return
       validator: (String value) {
-        // ignore: missing_return
         if (value.isEmpty || value.length < 6) {
           return 'Password invalid';
         }
@@ -80,7 +79,7 @@ class _AuthPageState extends State<AuthPage> {
       return;
     }
     _formKey.currentState.save();
-    login(_formData["email"], _formData["password"]);
+    login(_formData['email'], _formData['password']);
     Navigator.pushReplacementNamed(context, '/products');
   }
 

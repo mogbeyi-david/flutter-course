@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
-import './product_edit.dart';
+
 import 'package:scoped_model/scoped_model.dart';
-import 'package:flutter_course/scoped-models/main.dart';
+
+import './product_edit.dart';
+import '../scoped-models/main.dart';
 
 class ProductListPage extends StatelessWidget {
-  Widget buildEditButton(BuildContext context, int index, MainModel model) {
+  Widget _buildEditButton(BuildContext context, int index, MainModel model) {
     return IconButton(
-        icon: Icon(Icons.edit),
-        onPressed: () {
-          model.selectProduct(index);
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (BuildContext context) {
-            return ProductEditPage();
-          }));
-        });
+      icon: Icon(Icons.edit),
+      onPressed: () {
+        model.selectProduct(index);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return ProductEditPage();
+            },
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -23,26 +29,29 @@ class ProductListPage extends StatelessWidget {
         return ListView.builder(
           itemBuilder: (BuildContext context, int index) {
             return Dismissible(
-              background: Container(
-                color: Colors.red,
-              ),
+              key: Key(model.allProducts[index].title),
               onDismissed: (DismissDirection direction) {
                 if (direction == DismissDirection.endToStart) {
                   model.selectProduct(index);
                   model.deleteProduct();
+                } else if (direction == DismissDirection.startToEnd) {
+                  print('Swiped start to end');
+                } else {
+                  print('Other swiping');
                 }
               },
-              key: Key(model.allProducts[index].title),
+              background: Container(color: Colors.red),
               child: Column(
                 children: <Widget>[
                   ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: AssetImage(model.allProducts[index].image),
+                      backgroundImage:
+                          AssetImage(model.allProducts[index].image),
                     ),
                     title: Text(model.allProducts[index].title),
                     subtitle:
                         Text('\$${model.allProducts[index].price.toString()}'),
-                    trailing: buildEditButton(context, index, model),
+                    trailing: _buildEditButton(context, index, model),
                   ),
                   Divider()
                 ],

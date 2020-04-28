@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_course/scoped-models/main.dart';
+
 import 'package:scoped_model/scoped_model.dart';
+// import 'package:flutter/rendering.dart';
 
 import './pages/auth.dart';
 import './pages/products_admin.dart';
 import './pages/products.dart';
 import './pages/product.dart';
+import './scoped-models/main.dart';
 
 void main() {
+  // debugPaintSizeEnabled = true;
+  // debugPaintBaselinesEnabled = true;
+  // debugPaintPointersEnabled = true;
   runApp(MyApp());
 }
 
